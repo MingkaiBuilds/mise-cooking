@@ -15,7 +15,7 @@ Live analysis stays off until all four controls exist:
 3. Add a global daily request ceiling and a one-time pilot spending ceiling that fail closed.
 4. Require a lightweight bot challenge only after suspicious or repeated use.
 
-The public request path returns cached recipes even after the daily generation budget is exhausted. That preserves usefulness without creating unbounded spend. The initial sponsored ceiling is $200 per UTC month, with a conservative two-cent reservation before every cache miss and a 300-generation daily ceiling.
+The public request path returns cached recipes even after the daily generation budget is exhausted. That preserves usefulness without creating unbounded spend. The initial sponsored ceiling is a one-time $200 pool with no automatic reset, with a conservative two-cent reservation before every cache miss and a 300-generation daily ceiling.
 
 ## Cost architecture
 
