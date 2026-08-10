@@ -18,6 +18,8 @@ Thanks for helping make internet cooking knowledge more useful.
 4. Run `npm run lint` and `npm test`.
 5. Open a pull request explaining the user impact, test coverage, and any cost or privacy implications.
 
+Recipe behavior changes should add or update a privacy-safe fixture and explain their effect on the metrics in [docs/EVALUATION.md](./docs/EVALUATION.md). Security-sensitive work should be checked against [docs/THREAT_MODEL.md](./docs/THREAT_MODEL.md).
+
 Never include API keys, `.env` files, production salts, personal data, copyrighted video downloads, or scraped private content.
 
 ## Product principles

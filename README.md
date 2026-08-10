@@ -31,6 +31,20 @@ Raw IP addresses are not stored. The public status endpoint is available at [`/a
 
 See [IMPACT.md](./IMPACT.md) for the project's product and funding commitments.
 
+## Building the public commons
+
+The next stages are documented in public before the dataset grows:
+
+- [Roadmap](./docs/ROADMAP.md)
+- [Data governance](./docs/DATA_GOVERNANCE.md)
+- [Threat model](./docs/THREAT_MODEL.md)
+- [Evaluation program](./docs/EVALUATION.md)
+- [Public API charter](./docs/API_CHARTER.md)
+- [Prospective recipe record contract](./spec/recipe-record.v1.schema.json)
+- [Mise name and branding policy](./TRADEMARKS.md)
+
+These documents deliberately separate cached public knowledge from compute-heavy extraction, and factual recipe data from source media, personal data, and expressive creator content.
+
 ## Local development
 
 Requirements: Node.js 22.13 or newer.
@@ -48,7 +62,7 @@ npm test
 npm run db:generate
 ```
 
-Create an untracked `.env.local` for local configuration:
+Copy `.env.example` to an untracked `.env.local` for local configuration. The complete example documents every runtime control; the minimum values to review are:
 
 ```env
 OPENAI_API_KEY=your_project_key
@@ -73,7 +87,7 @@ The logical D1 binding is declared in `.openai/hosting.json`; production binding
 
 ## Contributing
 
-Bug reports, recipe-quality improvements, accessibility work, and cost-saving ideas are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request. Please report security issues according to [SECURITY.md](./SECURITY.md).
+Bug reports, recipe-quality improvements, accessibility work, and cost-saving ideas are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request. Please report security issues according to [SECURITY.md](./SECURITY.md). Every push and pull request runs lint, build tests, and CodeQL analysis; Dependabot tracks application and workflow dependencies.
 
 ## License
 

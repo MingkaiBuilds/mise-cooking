@@ -13,3 +13,5 @@ OpenAI keys, rate-limit salts, and hosted environment values must remain outside
 ## Scope priorities
 
 Reports involving unbounded paid usage, budget bypasses, secret exposure, injection into model instructions, D1 data access, denial of service, or misleading food-safety output are especially important.
+
+The maintained design baseline is [docs/THREAT_MODEL.md](./docs/THREAT_MODEL.md).

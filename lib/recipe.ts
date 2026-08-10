@@ -34,6 +34,79 @@ export type RecipeResult = {
   tips: string[];
 };
 
+const confidenceValues = new Set<Confidence>(["high", "medium", "low"]);
+
+function boundedString(value: unknown, maxLength: number): value is string {
+  return typeof value === "string" && value.trim().length > 0 && value.length <= maxLength;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+export function isRecipeResult(value: unknown, expectedServings?: number): value is RecipeResult {
+  if (!isRecord(value)) return false;
+  if (
+    !boundedString(value.title, 200) ||
+    !boundedString(value.subtitle, 500) ||
+    !boundedString(value.author, 200) ||
+    !boundedString(value.prepTime, 80) ||
+    !boundedString(value.cookTime, 80) ||
+    !boundedString(value.sourceNote, 1200) ||
+    !Number.isInteger(value.servings) ||
+    (value.servings as number) < 1 ||
+    (value.servings as number) > 12 ||
+    (expectedServings !== undefined && value.servings !== expectedServings) ||
+    !confidenceValues.has(value.confidence as Confidence)
+  ) {
+    return false;
+  }
+
+  if (!Array.isArray(value.ingredients) || value.ingredients.length < 2 || value.ingredients.length > 60) {
+    return false;
+  }
+  for (const ingredient of value.ingredients) {
+    if (
+      !isRecord(ingredient) ||
+      !boundedString(ingredient.name, 160) ||
+      !boundedString(ingredient.amount, 100) ||
+      !boundedString(ingredient.note, 600) ||
+      !boundedString(ingredient.product, 240) ||
+      !boundedString(ingredient.packageSize, 120) ||
+      !boundedString(ingredient.buyQuantity, 80) ||
+      !boundedString(ingredient.searchTerm, 160) ||
+      !confidenceValues.has(ingredient.confidence as Confidence) ||
+      typeof ingredient.optional !== "boolean"
+    ) {
+      return false;
+    }
+  }
+
+  if (!Array.isArray(value.steps) || value.steps.length < 2 || value.steps.length > 40) {
+    return false;
+  }
+  for (const step of value.steps) {
+    if (
+      !isRecord(step) ||
+      !boundedString(step.title, 160) ||
+      !boundedString(step.instruction, 2000) ||
+      !boundedString(step.why, 1200) ||
+      !boundedString(step.time, 80)
+    ) {
+      return false;
+    }
+  }
+
+  return (
+    Array.isArray(value.tools) &&
+    value.tools.length <= 30 &&
+    value.tools.every((tool) => boundedString(tool, 160)) &&
+    Array.isArray(value.tips) &&
+    value.tips.length <= 20 &&
+    value.tips.every((tip) => boundedString(tip, 600))
+  );
+}
+
 export const sampleRecipe: RecipeResult = {
   title: "Gochujang butter noodles",
   subtitle: "Glossy, spicy-sweet noodles with scallions and a jammy egg.",

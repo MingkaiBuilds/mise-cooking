@@ -25,6 +25,7 @@ test("server-renders the Mise product experience", async () => {
   assert.match(html, /What are we cooking/);
   assert.match(html, /Gochujang butter noodles/);
   assert.match(html, /Whole Foods/);
+  assert.match(html, /Read the open roadmap/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 
@@ -40,4 +41,16 @@ test("ships a hard budget ledger, quotas, caching, and optimized indexes", async
   assert.match(migration, /CREATE TABLE `quota_counters`/);
   assert.match(migration, /CREATE TABLE `budget_ledger`/);
   assert.match(migration, /PRAGMA optimize;/);
+});
+
+test("publishes a versioned recipe commons contract", async () => {
+  const schema = JSON.parse(
+    await readFile(new URL("../spec/recipe-record.v1.schema.json", import.meta.url), "utf8"),
+  );
+  assert.equal(schema.properties.schemaVersion.const, "1.0.0");
+  assert.ok(schema.required.includes("source"));
+  assert.ok(schema.required.includes("safety"));
+  assert.ok(schema.required.includes("rights"));
+  assert.ok(schema.$defs.ingredient.required.includes("evidenceRefs"));
+  assert.ok(schema.$defs.step.required.includes("confidence"));
 });

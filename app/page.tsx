@@ -124,6 +124,7 @@ export default function Home() {
         <nav aria-label="Primary navigation">
           <a href="#recipe">Example</a>
           <a href="#how">How it works</a>
+          <a href="https://github.com/MingkaiBuilds/mise-cooking/blob/main/docs/ROADMAP.md" target="_blank" rel="noreferrer">Roadmap ↗</a>
           <span className="store-pill"><span className="store-dot" /> Free public beta</span>
         </nav>
       </header>
@@ -328,6 +329,7 @@ export default function Home() {
             Mise is for people who learn to cook from the internet. The goal is simple: no account, no paywall, and no selling your attention—just a clearer path from “that looks good” to dinner on the table.
           </p>
           <p className="founding-note"><strong>$200 founding pilot.</strong> Usage is cached, rate-limited, and stopped automatically when the one-time pool is used—no automatic monthly reset.</p>
+          <a className="roadmap-link" href="https://github.com/MingkaiBuilds/mise-cooking/blob/main/docs/ROADMAP.md" target="_blank" rel="noreferrer">Read the open roadmap <span>↗</span></a>
         </div>
         <div className="mission-principles" aria-label="Mise principles">
           <div><span>01</span><strong>Free at the point of use</strong><p>Cost controls happen behind the scenes, never at the recipe.</p></div>

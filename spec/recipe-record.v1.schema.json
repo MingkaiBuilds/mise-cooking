@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mise-cooking.mingkai-builds.chatgpt.site/spec/recipe-record.v1.schema.json",
+  "title": "Mise Recipe Record v1",
+  "description": "Prospective public contract for an evidence-backed recipe record. The current pilot response is not yet guaranteed to implement this contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "recipeId",
+    "revisionId",
+    "status",
+    "title",
+    "servings",
+    "source",
+    "evidenceMode",
+    "ingredients",
+    "steps",
+    "safety",
+    "rights",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "recipeId": { "$ref": "#/$defs/id" },
+    "revisionId": { "$ref": "#/$defs/id" },
+    "status": {
+      "enum": ["draft", "published", "disputed", "withdrawn", "superseded"]
+    },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "subtitle": { "type": "string", "maxLength": 400 },
+    "servings": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "source": { "$ref": "#/$defs/source" },
+    "evidenceMode": {
+      "enum": [
+        "public-metadata",
+        "creator-authorized-media",
+        "user-authorized-upload",
+        "human-authored"
+      ]
+    },
+    "ingredients": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/ingredient" }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/step" }
+    },
+    "tools": {
+      "type": "array",
+      "maxItems": 50,
+      "items": { "type": "string", "minLength": 1, "maxLength": 120 },
+      "uniqueItems": true
+    },
+    "safety": { "$ref": "#/$defs/safety" },
+    "rights": { "$ref": "#/$defs/rights" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "supersedesRevisionId": { "$ref": "#/$defs/id" }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._~-]{7,127}$"
+    },
+    "confidence": {
+      "enum": ["observed", "creator-stated", "high", "medium", "low", "disputed"]
+    },
+    "evidenceRef": {
+      "type": "string",
+      "pattern": "^evidence:[A-Za-z0-9._~-]{1,120}$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "canonicalUrl", "retrievedAt"],
+      "properties": {
+        "platform": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "externalId": { "type": "string", "maxLength": 200 },
+        "canonicalUrl": { "type": "string", "format": "uri", "maxLength": 2048 },
+        "retrievedAt": { "type": "string", "format": "date-time" },
+        "creator": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["displayName"],
+          "properties": {
+            "displayName": { "type": "string", "minLength": 1, "maxLength": 200 },
+            "profileUrl": { "type": "string", "format": "uri", "maxLength": 2048 },
+            "claimStatus": { "enum": ["unclaimed", "pending", "verified", "disputed"] }
+          }
+        }
+      }
+    },
+    "quantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["display"],
+      "properties": {
+        "display": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "value": { "type": "number", "exclusiveMinimum": 0 },
+        "unit": { "type": "string", "maxLength": 40 },
+        "minimum": { "type": "number", "exclusiveMinimum": 0 },
+        "maximum": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "ingredient": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ingredientId", "name", "quantity", "confidence", "evidenceRefs"],
+      "properties": {
+        "ingredientId": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "normalizedName": { "type": "string", "maxLength": 160 },
+        "quantity": { "$ref": "#/$defs/quantity" },
+        "preparation": { "type": "string", "maxLength": 200 },
+        "optional": { "type": "boolean", "default": false },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "evidenceRefs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidenceRef" },
+          "uniqueItems": true
+        },
+        "allergenTags": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 80 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "temperature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "kind"],
+      "properties": {
+        "value": { "type": "number", "minimum": -100, "maximum": 1000 },
+        "unit": { "enum": ["C", "F"] },
+        "kind": { "enum": ["oven", "oil", "internal", "water", "holding", "other"] }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "title", "instruction", "why", "confidence", "evidenceRefs"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "instruction": { "type": "string", "minLength": 1, "maxLength": 2000 },
+        "why": { "type": "string", "minLength": 1, "maxLength": 1200 },
+        "durationSeconds": { "type": "integer", "minimum": 0, "maximum": 604800 },
+        "temperature": { "$ref": "#/$defs/temperature" },
+        "visualCue": { "type": "string", "maxLength": 600 },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "evidenceRefs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidenceRef" },
+          "uniqueItems": true
+        },
+        "safetyRefs": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 160 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewStatus", "allergenDisclaimer", "notes"],
+      "properties": {
+        "reviewStatus": { "enum": ["unreviewed", "automated", "human-reviewed", "escalated"] },
+        "allergenDisclaimer": { "type": "string", "minLength": 1, "maxLength": 600 },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 600 },
+          "uniqueItems": true
+        },
+        "authorityRefs": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri", "maxLength": 2048 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "rights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataLicense", "textLicense", "attributionRequired"],
+      "properties": {
+        "dataLicense": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "textLicense": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "attributionRequired": { "type": "boolean" },
+        "rightsNote": { "type": "string", "maxLength": 1000 }
+      }
+    }
+  }
+}

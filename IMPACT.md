@@ -42,4 +42,4 @@ The public request path returns cached recipes even after the daily generation b
 
 ## Next implementation milestone
 
-The D1-backed cache and quota ledger, privacy-preserving anonymous limiter, global kill switch, and public status endpoint are implemented. The remaining launch gate is adding the API key and running live load and abuse tests.
+The D1-backed cache and quota ledger, privacy-preserving anonymous limiter, global kill switch, and public status endpoint are implemented. Before general live analysis, Mise will build a permission-safe golden evaluation set, implement the versioned provenance record, run food-safety and source-injection tests, reconcile the internal ledger with provider billing, and launch through a tiny canary. See the [open roadmap](./docs/ROADMAP.md).

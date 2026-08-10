@@ -1,0 +1,47 @@
+name: Recipe quality report
+description: Report an inaccurate, incomplete, unsafe, or confusing reconstruction.
+title: "[Recipe quality]: "
+labels: [recipe-quality]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping the next cook. Do not include private information or copyrighted video downloads.
+  - type: input
+    id: source
+    attributes:
+      label: Public source URL
+      description: Link to the original creator's public post.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: What needs correction?
+      options:
+        - Ingredient
+        - Quantity
+        - Method or timing
+        - Product match
+        - Allergy or food safety
+        - Attribution
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: What Mise produced
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What would be more accurate or useful
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Urgency
+      options:
+        - label: This may create an allergy, food-safety, or other physical-safety risk.
