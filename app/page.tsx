@@ -26,7 +26,7 @@ export default function Home() {
   const [recipe, setRecipe] = useState<RecipeResult>(sampleRecipe);
   const [checked, setChecked] = useState<Set<number>>(new Set());
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
-  const [notice, setNotice] = useState("A finished example is waiting below.");
+  const [notice, setNotice] = useState("Public preview · live analysis opens after cost safeguards are in place.");
   const [error, setError] = useState("");
 
   const progress = useMemo(
@@ -102,7 +102,7 @@ export default function Home() {
         <nav aria-label="Primary navigation">
           <a href="#recipe">Example</a>
           <a href="#how">How it works</a>
-          <span className="store-pill"><span className="store-dot" /> Whole Foods ready</span>
+          <span className="store-pill"><span className="store-dot" /> Free public beta</span>
         </nav>
       </header>
 
@@ -114,8 +114,8 @@ export default function Home() {
             Drop a food TikTok. Mise rebuilds the recipe, finds your Whole Foods shopping matches, and explains the reason behind every step.
           </p>
           <div className="trust-row" aria-label="Product benefits">
+            <span>✓ Free, no account</span>
             <span>✓ Clear estimates</span>
-            <span>✓ Scaled quantities</span>
             <span>✓ No mystery steps</span>
           </div>
         </div>
@@ -292,10 +292,25 @@ export default function Home() {
         <div><span>03</span><h3>Shop & cook</h3><p>Open store searches, check off the list, then follow the explained method.</p></div>
       </section>
 
+      <section className="mission-section" id="mission">
+        <div className="mission-copy">
+          <div className="eyebrow"><span>✦</span> BUILT AS A PUBLIC GOOD</div>
+          <h2>Cooking knowledge should travel freely.</h2>
+          <p>
+            Mise is for people who learn to cook from the internet. The goal is simple: no account, no paywall, and no selling your attention—just a clearer path from “that looks good” to dinner on the table.
+          </p>
+        </div>
+        <div className="mission-principles" aria-label="Mise principles">
+          <div><span>01</span><strong>Free at the point of use</strong><p>Cost controls happen behind the scenes, never at the recipe.</p></div>
+          <div><span>02</span><strong>Honest about uncertainty</strong><p>Estimates are labeled so cooks can make informed choices.</p></div>
+          <div><span>03</span><strong>Community before growth</strong><p>Success means useful meals—not addictive engagement.</p></div>
+        </div>
+      </section>
+
       <footer>
         <a className="brand footer-brand" href="#top"><span className="brand-mark">m</span><span>mise</span></a>
         <p>Good food videos deserve good instructions.</p>
-        <span>Product suggestions are not live inventory.</span>
+        <span>Free to use · no account · public beta</span>
       </footer>
     </main>
   );

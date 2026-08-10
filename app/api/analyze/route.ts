@@ -1,4 +1,4 @@
-import { sampleRecipe, type RecipeResult } from "../../../lib/recipe";
+import type { RecipeResult } from "../../../lib/recipe";
 
 export const runtime = "edge";
 
@@ -137,10 +137,6 @@ function extractOutputText(response: Record<string, unknown>) {
   return null;
 }
 
-function scaledSample(servings: number): RecipeResult {
-  return { ...sampleRecipe, servings };
-}
-
 export async function POST(request: Request) {
   let body: AnalyzeRequest;
   try {
@@ -162,15 +158,13 @@ export async function POST(request: Request) {
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
-    return Response.json({
-      recipe: scaledSample(servings),
-      mode: "demo",
-      message:
-        "The analysis flow is ready. Add OPENAI_API_KEY to turn on live recipe reconstruction.",
-      source: metadata
-        ? { title: metadata.title, author: metadata.author_name }
-        : null,
-    });
+    return Response.json(
+      {
+        error:
+          "Live analysis is not enabled in the public beta yet. Explore the finished example while we add cost and abuse safeguards.",
+      },
+      { status: 503 },
+    );
   }
 
   const context = [
@@ -202,8 +196,8 @@ export async function POST(request: Request) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-5.6-sol",
-      reasoning: { effort: "medium" },
+      model: process.env.OPENAI_MODEL || "gpt-5.6-luna",
+      reasoning: { effort: "low" },
       input: [{ role: "user", content }],
       tools: [{ type: "web_search" }],
       text: {

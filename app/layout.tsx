@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 const title = "Mise — TikTok recipes, made cookable";
 const description =
-  "Turn a food TikTok into an evidence-aware recipe, a Whole Foods shopping list, and cooking instructions that explain why.";
+  "A free, no-account tool that turns food TikToks into evidence-aware recipes, Whole Foods shopping lists, and cooking instructions that explain why.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
