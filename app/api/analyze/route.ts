@@ -46,14 +46,14 @@ const recipeSchema = {
     "confidence", "sourceNote", "ingredients", "steps", "tools", "tips",
   ],
   properties: {
-    title: { type: "string" },
-    subtitle: { type: "string" },
-    author: { type: "string" },
+    title: { type: "string", minLength: 1, maxLength: 200 },
+    subtitle: { type: "string", minLength: 1, maxLength: 500 },
+    author: { type: "string", minLength: 1, maxLength: 200 },
     servings: { type: "integer" },
-    prepTime: { type: "string" },
-    cookTime: { type: "string" },
+    prepTime: { type: "string", minLength: 1, maxLength: 80 },
+    cookTime: { type: "string", minLength: 1, maxLength: 80 },
     confidence: { enum: ["high", "medium", "low"] },
-    sourceNote: { type: "string" },
+    sourceNote: { type: "string", minLength: 1, maxLength: 1200 },
     ingredients: {
       type: "array",
       minItems: 2,
@@ -65,14 +65,14 @@ const recipeSchema = {
           "buyQuantity", "searchTerm", "optional",
         ],
         properties: {
-          name: { type: "string" },
-          amount: { type: "string" },
-          note: { type: "string" },
+          name: { type: "string", minLength: 1, maxLength: 160 },
+          amount: { type: "string", minLength: 1, maxLength: 100 },
+          note: { type: "string", minLength: 1, maxLength: 600 },
           confidence: { enum: ["high", "medium", "low"] },
-          product: { type: "string" },
-          packageSize: { type: "string" },
-          buyQuantity: { type: "string" },
-          searchTerm: { type: "string" },
+          product: { type: "string", minLength: 1, maxLength: 240 },
+          packageSize: { type: "string", minLength: 1, maxLength: 120 },
+          buyQuantity: { type: "string", minLength: 1, maxLength: 80 },
+          searchTerm: { type: "string", minLength: 1, maxLength: 160 },
           optional: { type: "boolean" },
         },
       },
@@ -85,15 +85,23 @@ const recipeSchema = {
         additionalProperties: false,
         required: ["title", "instruction", "why", "time"],
         properties: {
-          title: { type: "string" },
-          instruction: { type: "string" },
-          why: { type: "string" },
-          time: { type: "string" },
+          title: { type: "string", minLength: 1, maxLength: 160 },
+          instruction: { type: "string", minLength: 1, maxLength: 2000 },
+          why: { type: "string", minLength: 1, maxLength: 1200 },
+          time: { type: "string", minLength: 1, maxLength: 80 },
         },
       },
     },
-    tools: { type: "array", items: { type: "string" } },
-    tips: { type: "array", items: { type: "string" } },
+    tools: {
+      type: "array",
+      maxItems: 30,
+      items: { type: "string", minLength: 1, maxLength: 160 },
+    },
+    tips: {
+      type: "array",
+      maxItems: 20,
+      items: { type: "string", minLength: 1, maxLength: 600 },
+    },
   },
 } as const;
 
@@ -318,26 +326,26 @@ export async function POST(request: Request) {
       return apiError("The recipe analysis could not be completed.", 502, "model_error");
     }
 
-    const outputText = extractOutputText(raw);
-    if (!outputText) return apiError("The model returned no structured recipe.", 502, "empty_model_response");
-    const recipe: unknown = JSON.parse(outputText);
-    if (!isRecipeResult(recipe, servings)) {
-      return apiError("The model response did not pass recipe validation.", 502, "invalid_model_response");
-    }
     const usage = raw.usage && typeof raw.usage === "object"
       ? (raw.usage as { input_tokens?: number; output_tokens?: number })
       : {};
     const inputTokens = Math.max(0, usage.input_tokens ?? 0);
     const outputTokens = Math.max(0, usage.output_tokens ?? 0);
     const actualMicros = estimateModelCostMicros(inputTokens, outputTokens, config);
+    await settleBudget(db, config.budgetPeriod, config.reservationMicros, actualMicros);
+    reservationOpen = false;
+
+    const outputText = extractOutputText(raw);
+    if (!outputText) return apiError("The model returned no structured recipe.", 502, "empty_model_response");
+    const recipe: unknown = JSON.parse(outputText);
+    if (!isRecipeResult(recipe, servings)) {
+      return apiError("The model response did not pass recipe validation.", 502, "invalid_model_response");
+    }
 
     await saveCachedRecipe(db, {
       cacheKey, videoId, sourceUrl: url, recipe, model, inputTokens, outputTokens,
       estimatedCostMicros: actualMicros, ttlSeconds: config.cacheTtlSeconds,
     });
-    await settleBudget(db, config.budgetPeriod, config.reservationMicros, actualMicros);
-    reservationOpen = false;
-
     return Response.json({
       recipe,
       mode: "live",

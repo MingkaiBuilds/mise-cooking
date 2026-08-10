@@ -54,7 +54,9 @@ test("keeps canary generation secret-gated while cached recipes stay reusable", 
   assert.match(canary, /SHA-256/);
   assert.match(route, /const cached = await getCachedRecipe/);
   assert.ok(route.indexOf("const cached = await getCachedRecipe") < route.indexOf("generation_paused"));
+  assert.ok(route.indexOf("await settleBudget") < route.indexOf("isRecipeResult(recipe, servings)"));
   assert.match(route, /canaryAccess \? "canary" : "public"/);
+  assert.match(route, /minLength: 1, maxLength: 600/);
 });
 
 test("publishes a versioned recipe commons contract", async () => {
