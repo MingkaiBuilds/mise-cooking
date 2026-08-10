@@ -12,7 +12,7 @@ type Tab = "shop" | "cook";
 
 type PilotStatus = {
   liveEnabled: boolean;
-  monthlyBudgetUsd: number;
+  pilotBudgetUsd: number;
   spentUsd: number;
   requestCount: number;
   cachedRecipes: number;
@@ -208,7 +208,7 @@ export default function Home() {
           {pilotStatus && (
             <div className={`pilot-status ${pilotStatus.liveEnabled ? "is-live" : ""}`}>
               <span>{pilotStatus.liveEnabled ? "Live pilot open" : "Pilot funded · activation pending"}</span>
-              <strong>${pilotStatus.spentUsd.toFixed(2)} / ${pilotStatus.monthlyBudgetUsd.toFixed(0)} used</strong>
+              <strong>${pilotStatus.spentUsd.toFixed(2)} / ${pilotStatus.pilotBudgetUsd.toFixed(0)} used</strong>
             </div>
           )}
         </form>
@@ -327,7 +327,7 @@ export default function Home() {
           <p>
             Mise is for people who learn to cook from the internet. The goal is simple: no account, no paywall, and no selling your attention—just a clearer path from “that looks good” to dinner on the table.
           </p>
-          <p className="founding-note"><strong>$200 founding pilot.</strong> Usage is cached, rate-limited, and stopped automatically at the monthly ceiling so the gift stays sustainable.</p>
+          <p className="founding-note"><strong>$200 founding pilot.</strong> Usage is cached, rate-limited, and stopped automatically when the one-time pool is used—no automatic monthly reset.</p>
         </div>
         <div className="mission-principles" aria-label="Mise principles">
           <div><span>01</span><strong>Free at the point of use</strong><p>Cost controls happen behind the scenes, never at the recipe.</p></div>

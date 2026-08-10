@@ -13,10 +13,10 @@ import {
   normalizeDietary,
   normalizeTikTokIdentity,
   releaseGenerationLock,
-  releaseMonthlyReservation,
-  reserveMonthlyBudget,
+  releaseBudgetReservation,
+  reserveBudget,
   saveCachedRecipe,
-  settleMonthlyBudget,
+  settleBudget,
 } from "../../../lib/guardrails";
 
 export const runtime = "edge";
@@ -212,12 +212,12 @@ export async function POST(request: Request) {
   if (!(await acquireGenerationLock(db, cacheKey))) {
     return apiError("This video is already being analyzed. Try again in a moment.", 409, "already_processing", 20);
   }
-  if (!(await reserveMonthlyBudget(db, config.monthlyBudgetMicros, config.reservationMicros))) {
+  if (!(await reserveBudget(db, config.budgetPeriod, config.pilotBudgetMicros, config.reservationMicros))) {
     await releaseGenerationLock(db, cacheKey);
     return apiError(
       "This month’s sponsored generation budget has been used. Cached recipes remain available.",
       503,
-      "monthly_budget_reached",
+      "pilot_budget_reached",
       3600,
     );
   }
@@ -287,7 +287,7 @@ export async function POST(request: Request) {
       cacheKey, videoId, sourceUrl: url, recipe, model, inputTokens, outputTokens,
       estimatedCostMicros: actualMicros, ttlSeconds: config.cacheTtlSeconds,
     });
-    await settleMonthlyBudget(db, config.reservationMicros, actualMicros);
+    await settleBudget(db, config.budgetPeriod, config.reservationMicros, actualMicros);
     reservationOpen = false;
 
     return Response.json({
@@ -303,7 +303,7 @@ export async function POST(request: Request) {
     }
     return apiError("The recipe analysis could not be completed.", 502, "analysis_failed");
   } finally {
-    if (reservationOpen) await releaseMonthlyReservation(db, config.reservationMicros);
+    if (reservationOpen) await releaseBudgetReservation(db, config.budgetPeriod, config.reservationMicros);
     await releaseGenerationLock(db, cacheKey);
   }
 }

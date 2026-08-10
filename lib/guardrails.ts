@@ -4,7 +4,8 @@ import type { RecipeResult } from "./recipe";
 const encoder = new TextEncoder();
 
 export type GuardrailConfig = {
-  monthlyBudgetMicros: number;
+  pilotBudgetMicros: number;
+  budgetPeriod: string;
   dailyGenerationLimit: number;
   userDailyGenerationLimit: number;
   hourlyRequestLimit: number;
@@ -33,7 +34,8 @@ function positiveNumber(value: string | undefined, fallback: number) {
 
 export function getGuardrailConfig(): GuardrailConfig {
   return {
-    monthlyBudgetMicros: Math.round(positiveNumber(process.env.MONTHLY_BUDGET_USD, 200) * 1_000_000),
+    pilotBudgetMicros: Math.round(positiveNumber(process.env.PILOT_BUDGET_USD, 200) * 1_000_000),
+    budgetPeriod: (process.env.BUDGET_PERIOD || "founding-pilot-2026").slice(0, 80),
     dailyGenerationLimit: Math.round(positiveNumber(process.env.DAILY_GENERATION_LIMIT, 300)),
     userDailyGenerationLimit: Math.round(positiveNumber(process.env.USER_DAILY_GENERATION_LIMIT, 8)),
     hourlyRequestLimit: Math.round(positiveNumber(process.env.HOURLY_REQUEST_LIMIT, 120)),
@@ -90,10 +92,6 @@ function utcDay(now = new Date()) {
 
 function utcHour(now = new Date()) {
   return now.toISOString().slice(0, 13);
-}
-
-export function utcMonth(now = new Date()) {
-  return now.toISOString().slice(0, 7);
 }
 
 export async function consumeQuota(
@@ -214,13 +212,13 @@ export async function releaseGenerationLock(db: D1Database, cacheKey: string) {
   await db.prepare("DELETE FROM generation_locks WHERE cache_key = ?").bind(cacheKey).run();
 }
 
-export async function reserveMonthlyBudget(
+export async function reserveBudget(
   db: D1Database,
+  period: string,
   limitMicros: number,
   reservationMicros: number,
 ) {
   if (reservationMicros > limitMicros) return false;
-  const period = utcMonth();
   const now = Math.floor(Date.now() / 1000);
   const result = await db
     .prepare(
@@ -237,19 +235,24 @@ export async function reserveMonthlyBudget(
   return changes(result) > 0;
 }
 
-export async function releaseMonthlyReservation(db: D1Database, reservationMicros: number) {
+export async function releaseBudgetReservation(
+  db: D1Database,
+  period: string,
+  reservationMicros: number,
+) {
   await db
     .prepare(
       `UPDATE budget_ledger
        SET reserved_micros = MAX(0, reserved_micros - ?), updated_at = ?
        WHERE period = ?`,
     )
-    .bind(reservationMicros, Math.floor(Date.now() / 1000), utcMonth())
+    .bind(reservationMicros, Math.floor(Date.now() / 1000), period)
     .run();
 }
 
-export async function settleMonthlyBudget(
+export async function settleBudget(
   db: D1Database,
+  period: string,
   reservationMicros: number,
   actualMicros: number,
 ) {
@@ -262,7 +265,7 @@ export async function settleMonthlyBudget(
            updated_at = ?
        WHERE period = ?`,
     )
-    .bind(reservationMicros, actualMicros, Math.floor(Date.now() / 1000), utcMonth())
+    .bind(reservationMicros, actualMicros, Math.floor(Date.now() / 1000), period)
     .run();
 }
 
@@ -283,11 +286,11 @@ export async function getBudgetStatus(db: D1Database, config: GuardrailConfig) {
       `SELECT spent_micros, reserved_micros, request_count
        FROM budget_ledger WHERE period = ?`,
     )
-    .bind(utcMonth())
+    .bind(config.budgetPeriod)
     .first<BudgetRow>();
   const cached = await db.prepare("SELECT COUNT(*) AS count FROM recipe_cache").first<{ count: number }>();
   return {
-    monthlyBudgetUsd: config.monthlyBudgetMicros / 1_000_000,
+    pilotBudgetUsd: config.pilotBudgetMicros / 1_000_000,
     spentUsd: (row?.spent_micros ?? 0) / 1_000_000,
     reservedUsd: (row?.reserved_micros ?? 0) / 1_000_000,
     requestCount: row?.request_count ?? 0,

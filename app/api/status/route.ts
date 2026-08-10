@@ -15,7 +15,7 @@ export async function GET() {
   if (!db) {
     return Response.json({
       liveEnabled: false,
-      monthlyBudgetUsd: config.monthlyBudgetMicros / 1_000_000,
+      pilotBudgetUsd: config.pilotBudgetMicros / 1_000_000,
       spentUsd: 0,
       reservedUsd: 0,
       requestCount: 0,
@@ -30,7 +30,7 @@ export async function GET() {
   } catch {
     return Response.json({
       liveEnabled: false,
-      monthlyBudgetUsd: config.monthlyBudgetMicros / 1_000_000,
+      pilotBudgetUsd: config.pilotBudgetMicros / 1_000_000,
       spentUsd: 0,
       reservedUsd: 0,
       requestCount: 0,

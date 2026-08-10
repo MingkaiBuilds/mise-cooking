@@ -12,7 +12,7 @@ Live analysis stays off until all four controls exist:
 
 1. Cache a base reconstruction by normalized TikTok video ID so a popular video is analyzed once and can help many people.
 2. Apply anonymous per-network and per-browser limits without building a behavioral profile.
-3. Add a global daily request ceiling and a monthly spending ceiling that fail closed.
+3. Add a global daily request ceiling and a one-time pilot spending ceiling that fail closed.
 4. Require a lightweight bot challenge only after suspicious or repeated use.
 
 The public request path returns cached recipes even after the daily generation budget is exhausted. That preserves usefulness without creating unbounded spend. The initial sponsored ceiling is $200 per UTC month, with a conservative two-cent reservation before every cache miss and a 300-generation daily ceiling.
@@ -27,8 +27,8 @@ The public request path returns cached recipes even after the daily generation b
 
 ## Sustainable funding ladder
 
-1. Begin with a small founder-sponsored monthly cap.
-2. Add optional, quiet community support with transparent monthly costs and no feature gating.
+1. Begin with a one-time $200 founder-sponsored pilot pool.
+2. Add optional, quiet community support with transparent costs and no feature gating.
 3. Pursue aligned grants or sponsors that cannot influence recipe rankings or product recommendations.
 4. Consider clearly disclosed affiliate links only if they improve the shopping handoff and never change what Mise recommends.
 

@@ -32,7 +32,8 @@ test("ships a hard budget ledger, quotas, caching, and optimized indexes", async
   const guardrails = await readFile(new URL("../lib/guardrails.ts", import.meta.url), "utf8");
   const migration = await readFile(new URL("../drizzle/0000_greedy_cable.sql", import.meta.url), "utf8");
 
-  assert.match(guardrails, /positiveNumber\(process\.env\.MONTHLY_BUDGET_USD, 200\)/);
+  assert.match(guardrails, /positiveNumber\(process\.env\.PILOT_BUDGET_USD, 200\)/);
+  assert.match(guardrails, /founding-pilot-2026/);
   assert.match(guardrails, /WHERE budget_ledger\.spent_micros \+ budget_ledger\.reserved_micros/);
   assert.match(guardrails, /allowUserGeneration/);
   assert.match(migration, /CREATE TABLE `recipe_cache`/);
