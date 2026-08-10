@@ -15,7 +15,7 @@ Live analysis stays off until all four controls exist:
 3. Add a global daily request ceiling and a monthly spending ceiling that fail closed.
 4. Require a lightweight bot challenge only after suspicious or repeated use.
 
-The public request path should return cached recipes even after the daily generation budget is exhausted. That preserves usefulness without creating unbounded spend.
+The public request path returns cached recipes even after the daily generation budget is exhausted. That preserves usefulness without creating unbounded spend. The initial sponsored ceiling is $200 per UTC month, with a conservative two-cent reservation before every cache miss and a 300-generation daily ceiling.
 
 ## Cost architecture
 
@@ -42,4 +42,4 @@ The public request path should return cached recipes even after the daily genera
 
 ## Next implementation milestone
 
-Add a small D1-backed cache and quota ledger, an anonymous privacy-preserving rate limiter, a global kill switch, and a public status message. Enable the API key only after these controls pass load and abuse tests.
+The D1-backed cache and quota ledger, privacy-preserving anonymous limiter, global kill switch, and public status endpoint are implemented. The remaining launch gate is adding the API key and running live load and abuse tests.

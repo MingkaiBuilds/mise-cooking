@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   sampleRecipe,
   wholeFoodsSearchUrl,
@@ -9,6 +9,14 @@ import {
 } from "../lib/recipe";
 
 type Tab = "shop" | "cook";
+
+type PilotStatus = {
+  liveEnabled: boolean;
+  monthlyBudgetUsd: number;
+  spentUsd: number;
+  requestCount: number;
+  cachedRecipes: number;
+};
 
 const demoUrl = "https://www.tiktok.com/@mise/video/7422191990384123179";
 
@@ -26,8 +34,22 @@ export default function Home() {
   const [recipe, setRecipe] = useState<RecipeResult>(sampleRecipe);
   const [checked, setChecked] = useState<Set<number>>(new Set());
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [pilotStatus, setPilotStatus] = useState<PilotStatus | null>(null);
   const [notice, setNotice] = useState("Public preview · live analysis opens after cost safeguards are in place.");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/status")
+      .then((response) => response.json())
+      .then((data: PilotStatus) => {
+        if (active) setPilotStatus(data);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const progress = useMemo(
     () => Math.round((checked.size / Math.max(recipe.ingredients.length, 1)) * 100),
@@ -158,7 +180,7 @@ export default function Home() {
               </div>
             </div>
             <div>
-              <label>Servings</label>
+              <span className="form-label">Servings</span>
               <div className="stepper" aria-label="Number of servings">
                 <button type="button" onClick={() => setServings(Math.max(1, servings - 1))} aria-label="Fewer servings">−</button>
                 <span>{servings}</span>
@@ -183,6 +205,12 @@ export default function Home() {
           </button>
           <button className="demo-button" type="button" onClick={loadDemo}>or explore the finished example</button>
           <p className="form-note"><span className={status === "loading" ? "pulse-dot" : "note-dot"} /> {notice}</p>
+          {pilotStatus && (
+            <div className={`pilot-status ${pilotStatus.liveEnabled ? "is-live" : ""}`}>
+              <span>{pilotStatus.liveEnabled ? "Live pilot open" : "Pilot funded · activation pending"}</span>
+              <strong>${pilotStatus.spentUsd.toFixed(2)} / ${pilotStatus.monthlyBudgetUsd.toFixed(0)} used</strong>
+            </div>
+          )}
         </form>
       </section>
 
@@ -299,6 +327,7 @@ export default function Home() {
           <p>
             Mise is for people who learn to cook from the internet. The goal is simple: no account, no paywall, and no selling your attention—just a clearer path from “that looks good” to dinner on the table.
           </p>
+          <p className="founding-note"><strong>$200 founding pilot.</strong> Usage is cached, rate-limited, and stopped automatically at the monthly ceiling so the gift stays sustainable.</p>
         </div>
         <div className="mission-principles" aria-label="Mise principles">
           <div><span>01</span><strong>Free at the point of use</strong><p>Cost controls happen behind the scenes, never at the recipe.</p></div>
