@@ -1,4 +1,9 @@
-import { getBudgetStatus, getGuardrailConfig, getRuntimeDb } from "../../../lib/guardrails";
+import {
+  ensureRuntimeSchema,
+  getBudgetStatus,
+  getGuardrailConfig,
+  getRuntimeDb,
+} from "../../../lib/guardrails";
 
 export const runtime = "edge";
 
@@ -25,6 +30,7 @@ export async function GET() {
   }
 
   try {
+    await ensureRuntimeSchema(db);
     const status = await getBudgetStatus(db, config);
     return Response.json({ ...status, liveEnabled, dailyGenerationLimit: config.dailyGenerationLimit });
   } catch {

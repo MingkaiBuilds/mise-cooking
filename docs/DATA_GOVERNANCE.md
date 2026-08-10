@@ -50,6 +50,16 @@ Examples: pseudonymous quota buckets, request counts, model usage, costs, cache 
 - Use short retention windows and aggregate before publication.
 - Keep optional contributor identity separate from anonymous cooking use.
 
+### 6. Retailer catalog data
+
+Examples: provider product ID, package size, store or service-area scope,
+availability state, price, retrieval time, and provider display requirements.
+
+- Preserve provider, scope, timestamp, and verification state with every claim.
+- Expire price and availability quickly; stale data becomes unverified.
+- Do not retain retailer credentials, carts, order history, or personalized prices.
+- Follow the [retailer integration policy](./RETAILER_INTEGRATIONS.md).
+
 ## Data Mise should not collect by default
 
 - downloaded copies of public videos or audio;

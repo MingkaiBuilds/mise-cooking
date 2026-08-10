@@ -27,6 +27,8 @@ type BudgetRow = {
   request_count: number;
 };
 
+let schemaInitialization: { db: D1Database; promise: Promise<void> } | null = null;
+
 function positiveNumber(value: string | undefined, fallback: number) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
@@ -48,6 +50,89 @@ export function getGuardrailConfig(): GuardrailConfig {
 
 export function getRuntimeDb(): D1Database | null {
   return ((env as unknown as { DB?: D1Database }).DB ?? null);
+}
+
+async function initializeRuntimeSchema(db: D1Database) {
+  const existing = await db
+    .prepare(
+      `SELECT COUNT(*) AS count
+       FROM sqlite_schema
+       WHERE type = 'table'
+         AND name IN ('budget_ledger', 'generation_locks', 'quota_counters', 'recipe_cache')`,
+    )
+    .first<{ count: number }>();
+  if (Number(existing?.count ?? 0) === 4) return;
+
+  // Keep these idempotent statements aligned with db/schema.ts and checked-in migrations.
+  await db.batch([
+    db.prepare(
+      `CREATE TABLE IF NOT EXISTS budget_ledger (
+         period TEXT PRIMARY KEY NOT NULL,
+         spent_micros INTEGER DEFAULT 0 NOT NULL,
+         reserved_micros INTEGER DEFAULT 0 NOT NULL,
+         request_count INTEGER DEFAULT 0 NOT NULL,
+         updated_at INTEGER DEFAULT (unixepoch()) NOT NULL
+       )`,
+    ),
+    db.prepare(
+      `CREATE TABLE IF NOT EXISTS generation_locks (
+         cache_key TEXT PRIMARY KEY NOT NULL,
+         expires_at INTEGER NOT NULL
+       )`,
+    ),
+    db.prepare(
+      `CREATE INDEX IF NOT EXISTS idx_generation_locks_expires_at
+       ON generation_locks (expires_at)`,
+    ),
+    db.prepare(
+      `CREATE TABLE IF NOT EXISTS quota_counters (
+         bucket TEXT NOT NULL,
+         window TEXT NOT NULL,
+         count INTEGER DEFAULT 0 NOT NULL,
+         updated_at INTEGER DEFAULT (unixepoch()) NOT NULL,
+         PRIMARY KEY (bucket, window)
+       )`,
+    ),
+    db.prepare(
+      `CREATE INDEX IF NOT EXISTS idx_quota_counters_updated_at
+       ON quota_counters (updated_at)`,
+    ),
+    db.prepare(
+      `CREATE TABLE IF NOT EXISTS recipe_cache (
+         cache_key TEXT PRIMARY KEY NOT NULL,
+         video_id TEXT NOT NULL,
+         source_url TEXT NOT NULL,
+         recipe_json TEXT NOT NULL,
+         model TEXT NOT NULL,
+         input_tokens INTEGER DEFAULT 0 NOT NULL,
+         output_tokens INTEGER DEFAULT 0 NOT NULL,
+         estimated_cost_micros INTEGER DEFAULT 0 NOT NULL,
+         hit_count INTEGER DEFAULT 0 NOT NULL,
+         created_at INTEGER DEFAULT (unixepoch()) NOT NULL,
+         expires_at INTEGER NOT NULL
+       )`,
+    ),
+    db.prepare(
+      `CREATE INDEX IF NOT EXISTS idx_recipe_cache_video_id
+       ON recipe_cache (video_id)`,
+    ),
+    db.prepare(
+      `CREATE INDEX IF NOT EXISTS idx_recipe_cache_expires_at
+       ON recipe_cache (expires_at)`,
+    ),
+  ]);
+  await db.prepare("PRAGMA optimize").run();
+}
+
+export function ensureRuntimeSchema(db: D1Database) {
+  if (schemaInitialization?.db === db) return schemaInitialization.promise;
+
+  const promise = initializeRuntimeSchema(db).catch((error) => {
+    if (schemaInitialization?.db === db) schemaInitialization = null;
+    throw error;
+  });
+  schemaInitialization = { db, promise };
+  return promise;
 }
 
 async function sha256(value: string) {

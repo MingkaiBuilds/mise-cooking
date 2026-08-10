@@ -7,6 +7,7 @@ import {
   anonymousRequestId,
   buildRecipeCacheKey,
   estimateModelCostMicros,
+  ensureRuntimeSchema,
   getCachedRecipe,
   getGuardrailConfig,
   getRuntimeDb,
@@ -18,6 +19,7 @@ import {
   saveCachedRecipe,
   settleBudget,
 } from "../../../lib/guardrails";
+import { hasCanaryAccess } from "../../../lib/canary";
 
 export const runtime = "edge";
 
@@ -187,27 +189,15 @@ export async function POST(request: Request) {
   }
   const url = canonicalTikTokUrl(submittedUrl);
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    return apiError(
-      "Live analysis is not enabled in the public beta yet. Explore the finished example while setup is completed.",
-      503,
-      "live_not_configured",
-    );
-  }
-
-  if (process.env.GENERATION_ENABLED === "false") {
-    return apiError(
-      "New analyses are paused, but saved recipes remain available. Please try again later.",
-      503,
-      "generation_paused",
-      3600,
-    );
-  }
-
   const db = getRuntimeDb();
   const salt = process.env.RATE_LIMIT_SALT;
   if (!db || !salt) {
+    return apiError("Live analysis is temporarily unavailable.", 503, "guardrails_unavailable", 900);
+  }
+
+  try {
+    await ensureRuntimeSchema(db);
+  } catch {
     return apiError("Live analysis is temporarily unavailable.", 503, "guardrails_unavailable", 900);
   }
 
@@ -228,6 +218,25 @@ export async function POST(request: Request) {
       cache: "hit",
       message: "Loaded from the community recipe cache—no new AI generation was needed.",
     });
+  }
+
+  const canaryAccess = await hasCanaryAccess(request);
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    return apiError(
+      "Live analysis is not enabled in the public beta yet. Explore the finished example while setup is completed.",
+      503,
+      "live_not_configured",
+    );
+  }
+
+  if (process.env.GENERATION_ENABLED === "false" && !canaryAccess) {
+    return apiError(
+      "New analyses are paused, but saved recipes remain available. Please try again later.",
+      503,
+      "generation_paused",
+      3600,
+    );
   }
 
   if (!(await allowUserGeneration(db, anonymousId, config.userDailyGenerationLimit))) {
@@ -332,6 +341,7 @@ export async function POST(request: Request) {
     return Response.json({
       recipe,
       mode: "live",
+      access: canaryAccess ? "canary" : "public",
       cache: "miss",
       message: "New reconstruction complete and saved for future cooks. Verify labels and local stock before buying.",
       source: { title: metadata.title, author: metadata.author_name },

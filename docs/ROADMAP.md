@@ -61,6 +61,7 @@ Build:
 
 - pantry-aware shopping lists;
 - live retailer integrations for store, availability, price, package size, and cart handoff;
+- explicit suggested, catalog-verified, and store-verified match states under the [retailer integration policy](./RETAILER_INTEGRATIONS.md);
 - substitution ranking by culinary function, dietary needs, price, and waste;
 - multi-recipe planning that reuses ingredients across meals;
 - public-domain nutrition references with source and uncertainty;
@@ -134,9 +135,10 @@ Build:
 
 ## Immediate work queue
 
-1. Save the project API key securely and keep generation disabled.
+1. Keep public generation disabled while the secret canary and budget ledger are evaluated.
 2. Assemble 30–50 permission-safe golden cases with expert expected outputs.
 3. Implement the versioned recipe record and deterministic validators.
 4. Run extraction offline against the golden set and publish aggregate eval results.
 5. Red-team source injection, unsafe cooking advice, URL handling, budget bypass, and denial-of-wallet attacks.
-6. Enable a tiny canary cohort, then expand only when the exit criteria hold.
+6. Apply for legitimate retailer access; never substitute scraping for an official provider.
+7. Expand the canary only when the exit criteria hold.

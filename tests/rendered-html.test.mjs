@@ -37,10 +37,24 @@ test("ships a hard budget ledger, quotas, caching, and optimized indexes", async
   assert.match(guardrails, /founding-pilot-2026/);
   assert.match(guardrails, /WHERE budget_ledger\.spent_micros \+ budget_ledger\.reserved_micros/);
   assert.match(guardrails, /allowUserGeneration/);
+  assert.match(guardrails, /ensureRuntimeSchema/);
+  assert.match(guardrails, /CREATE TABLE IF NOT EXISTS recipe_cache/);
   assert.match(migration, /CREATE TABLE `recipe_cache`/);
   assert.match(migration, /CREATE TABLE `quota_counters`/);
   assert.match(migration, /CREATE TABLE `budget_ledger`/);
   assert.match(migration, /PRAGMA optimize;/);
+});
+
+test("keeps canary generation secret-gated while cached recipes stay reusable", async () => {
+  const canary = await readFile(new URL("../lib/canary.ts", import.meta.url), "utf8");
+  const route = await readFile(new URL("../app/api/analyze/route.ts", import.meta.url), "utf8");
+
+  assert.match(canary, /x-mise-canary-token/);
+  assert.match(canary, /CANARY_ACCESS_TOKEN/);
+  assert.match(canary, /SHA-256/);
+  assert.match(route, /const cached = await getCachedRecipe/);
+  assert.ok(route.indexOf("const cached = await getCachedRecipe") < route.indexOf("generation_paused"));
+  assert.match(route, /canaryAccess \? "canary" : "public"/);
 });
 
 test("publishes a versioned recipe commons contract", async () => {
@@ -53,4 +67,16 @@ test("publishes a versioned recipe commons contract", async () => {
   assert.ok(schema.required.includes("rights"));
   assert.ok(schema.$defs.ingredient.required.includes("evidenceRefs"));
   assert.ok(schema.$defs.step.required.includes("confidence"));
+});
+
+test("documents retailer verification states and forbids scraped inventory claims", async () => {
+  const policy = await readFile(
+    new URL("../docs/RETAILER_INTEGRATIONS.md", import.meta.url),
+    "utf8",
+  );
+  assert.match(policy, /Suggested/);
+  assert.match(policy, /Catalog verified/);
+  assert.match(policy, /Store verified/);
+  assert.match(policy, /avoid scraping authenticated storefronts/);
+  assert.match(policy, /stale data fails back to “suggested/);
 });

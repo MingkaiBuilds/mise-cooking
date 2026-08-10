@@ -27,6 +27,11 @@ The founding pilot has a one-time $200 generation pool with no automatic reset. 
 - a 90-day shared recipe cache; and
 - a global generation kill switch.
 
+Cached recipes remain reusable while generation is paused. Maintainers can test
+new cache misses without opening the public switch by configuring a strong
+`CANARY_ACCESS_TOKEN` and sending it in the `X-Mise-Canary-Token` header. Canary
+requests still consume the same quotas and founding-pilot budget.
+
 Raw IP addresses are not stored. The public status endpoint is available at [`/api/status`](https://mise-cooking.mingkai-builds.chatgpt.site/api/status).
 
 See [IMPACT.md](./IMPACT.md) for the project's product and funding commitments.
@@ -39,6 +44,7 @@ The next stages are documented in public before the dataset grows:
 - [Data governance](./docs/DATA_GOVERNANCE.md)
 - [Threat model](./docs/THREAT_MODEL.md)
 - [Evaluation program](./docs/EVALUATION.md)
+- [Retailer integration policy](./docs/RETAILER_INTEGRATIONS.md)
 - [Public API charter](./docs/API_CHARTER.md)
 - [Prospective recipe record contract](./spec/recipe-record.v1.schema.json)
 - [Mise name and branding policy](./TRADEMARKS.md)
@@ -69,11 +75,14 @@ OPENAI_API_KEY=your_project_key
 OPENAI_MODEL=gpt-5.6-luna
 GENERATION_ENABLED=false
 RATE_LIMIT_SALT=use-a-long-random-secret
+CANARY_ACCESS_TOKEN=use-a-separate-long-random-secret
 PILOT_BUDGET_USD=200
 BUDGET_PERIOD=founding-pilot-2026
 ```
 
 Environment files are ignored by Git. Never commit keys or production salts.
+The application initializes missing D1 tables idempotently on first use; checked-in
+Drizzle migrations remain the auditable production schema history.
 
 ## Architecture
 
