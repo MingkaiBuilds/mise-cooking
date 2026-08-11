@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mise.cooking/schemas/candidate-run.v1.schema.json",
+  "title": "Mise candidate evaluation run",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "run", "results"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "run": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["createdAt", "system"],
+      "properties": {
+        "createdAt": { "type": "string", "format": "date-time" },
+        "system": { "type": "string", "minLength": 1 },
+        "model": { "type": "string" },
+        "gitCommit": { "type": "string" }
+      }
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["caseId"],
+        "properties": {
+          "caseId": { "type": "string", "pattern": "^mise-seed-[0-9]{3}$" },
+          "recipe": { "type": "object" },
+          "error": { "type": ["string", "null"] },
+          "latencyMs": { "type": "number", "minimum": 0 },
+          "inputTokens": { "type": "integer", "minimum": 0 },
+          "outputTokens": { "type": "integer", "minimum": 0 },
+          "costUsd": { "type": "number", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

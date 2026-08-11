@@ -136,9 +136,9 @@ Build:
 ## Immediate work queue
 
 1. Keep public generation disabled while the secret canary and budget ledger are evaluated.
-2. Assemble 30–50 permission-safe golden cases with expert expected outputs.
-3. Implement the versioned recipe record and deterministic validators.
-4. Run extraction offline against the golden set and publish aggregate eval results.
+2. Recruit culinary and safety reviewers to promote the 30 permission-safe seed cases from `draft` to genuinely approved golden cases.
+3. Run extraction offline against the seed, establish a caption-only baseline, and publish aggregate quality, safety, latency, and cost results.
+4. Extend deterministic validation from the current schema, ingredient, confidence, safety, and retailer-honesty gates to quantity ranges, units, and allergens.
 5. Red-team source injection, unsafe cooking advice, URL handling, budget bypass, and denial-of-wallet attacks.
 6. Apply for legitimate retailer access; never substitute scraping for an official provider.
 7. Expand the canary only when the exit criteria hold.

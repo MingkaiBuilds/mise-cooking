@@ -44,6 +44,7 @@ The next stages are documented in public before the dataset grows:
 - [Data governance](./docs/DATA_GOVERNANCE.md)
 - [Threat model](./docs/THREAT_MODEL.md)
 - [Evaluation program](./docs/EVALUATION.md)
+- [Permission-safe evaluation seed](./evals/golden/cases.v1.json)
 - [Retailer integration policy](./docs/RETAILER_INTEGRATIONS.md)
 - [Public API charter](./docs/API_CHARTER.md)
 - [Prospective recipe record contract](./spec/recipe-record.v1.schema.json)
@@ -65,6 +66,7 @@ Useful checks:
 ```bash
 npm run lint
 npm test
+npm run eval:validate
 npm run db:generate
 ```
 

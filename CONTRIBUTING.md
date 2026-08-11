@@ -20,6 +20,18 @@ Thanks for helping make internet cooking knowledge more useful.
 
 Recipe behavior changes should add or update a privacy-safe fixture and explain their effect on the metrics in [docs/EVALUATION.md](./docs/EVALUATION.md). Security-sensitive work should be checked against [docs/THREAT_MODEL.md](./docs/THREAT_MODEL.md).
 
+Evaluation fixtures must be Mise-authored synthetic evidence, public-domain
+material, or material with documented permission. Do not paste creator captions,
+transcripts, screenshots, or downloaded media into the repository merely because
+they are publicly viewable. Validate fixture coverage with `npm run eval:validate`.
+Draft fixtures are useful tests but must not be described as expert-approved.
+
+Candidate systems can write the versioned
+[`evals/candidate-run.v1.schema.json`](./evals/candidate-run.v1.schema.json) format
+and run `node scripts/eval-golden.mjs --results path/to/run.json`. A partial local
+run requires the explicit `--allow-partial` flag; release comparisons should use
+all cases.
+
 Never include API keys, `.env` files, production salts, personal data, copyrighted video downloads, or scraped private content.
 
 ## Product principles
